@@ -187,14 +187,15 @@ spectra_types<-unlist(lapply(dry_df_split,function(x) length(unique(x$spectra_ty
 big_leaves<-names(dry_df_split)[which(spectra_types<2)]
 
 big_spectra<-dry_df[dry_df$specimen %in% big_leaves,]
-# average these!
-wvl_cols<-which(colnames(big_spectra) %in% wvl_range)
-big_spectra_mean<-aggregate(big_spectra[,wvl_cols],
+# average!
+big_spectra_mean<-aggregate(big_spectra,
                             by=list(big_spectra$specimen),
                             FUN=try_keep_txt(mean))
-dry_spectra_big<-spectra(big_spectra_mean[,-1],
-                         names=big_spectra_mean[,1],
-                         bands=wvl_range)
+
+dry_spectra_big<-spectra(big_spectra_mean[,which(colnames(big_spectra_mean) %in% wvl_range)],
+                         names=big_spectra_mean$sample_name,
+                         bands=wvl_range,
+                         meta = data.frame(specimen = big_spectra_mean$specimen))
 
 ## perform corrections for the remainder (small leaves)
 
@@ -218,15 +219,20 @@ small_leaves_corr<-lapply(small_leaves_avg,
                                  wvl_400<-which(colnames(with_paper)==400)
                                  gap_fraction<-(with_paper[wvl_400]-without_paper[wvl_400])*spectralon_ref/filter_spectra_avg[wvl_400]
                                  corr_spec<-without_paper*spectralon_ref/(1-as.numeric(gap_fraction))
-                                 return(list(gap_fraction,corr_spec))
+                                 
+                                 specimen<-sample$specimen[[1]]
+                                 return(list(gap_fraction,specimen,corr_spec))
                                })
 
-small_leaves_corr_list<-lapply(small_leaves_corr,function(x) x[[2]])
+small_leaves_corr_list<-lapply(small_leaves_corr,function(x) x[[3]])
 small_leaves_corr_df<-do.call(rbind.data.frame,small_leaves_corr_list)
 
 dry_spectra_small<-spectra(small_leaves_corr_df,
                            bands = wvl_range,
                            names = names(small_leaves_corr))
+
+meta(dry_spectra_small)$specimen<-unlist(lapply(small_leaves_corr,
+                                                    function(x) x[[2]]))
 meta(dry_spectra_small)$gap_fraction<-unlist(lapply(small_leaves_corr,
                                                     function(x) x[[1]]))
 
