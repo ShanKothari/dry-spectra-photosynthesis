@@ -111,7 +111,7 @@ dry_meta$file_name<-paste0(dry_meta$basename,"_",
 ## cleaning, resampling, and matching sensors
 
 sensor.ends<-NULL
-## find indices of last wavelength for first two sensors
+# find indices of last wavelength for first two sensors
 for(i in 1:(ncol(dry_spectra_raw)-1)){if(bands(dry_spectra_raw)[i]>bands(dry_spectra_raw)[i+1]) sensor.ends<-c(sensor.ends,i)}
 
 spectra_s1_bands<-bands(dry_spectra_raw)[1:sensor.ends[1]]
@@ -122,27 +122,30 @@ spectra_s1<-dry_spectra_raw[,spectra_s1_bands]
 spectra_s2<-dry_spectra_raw[,spectra_s2_bands]
 spectra_s3<-dry_spectra_raw[,spectra_s3_bands]
 
-spectra_s1_resamp<-as.matrix(resample(spectra_s1,new_bands = 350:1010))
+wvl_begin<-350
+wvl_end<-2500
+
+spectra_s1_resamp<-as.matrix(resample(spectra_s1,new_bands = wvl_begin:1010))
 spectra_s2_resamp<-as.matrix(resample(spectra_s2,new_bands = 1000:1910))
-spectra_s3_resamp<-as.matrix(resample(spectra_s3,new_bands = 1900:2500))
+spectra_s3_resamp<-as.matrix(resample(spectra_s3,new_bands = 1900:wvl_end))
 spectra_resamp<-do.call(cbind,args = list(spectra_s1_resamp,
                                           spectra_s2_resamp,
                                           spectra_s3_resamp))
-# rownames(spectra_resamp)[1]<-"sample_id"
+
 spectra_resamp_long<-melt(spectra_resamp,id.vars="sample_id")
 colnames(spectra_resamp_long)<-c("sample_id","wavelength","reflectance")
 
 spectra_resamp_long$wvl_id<-paste(spectra_resamp_long$sample_id,spectra_resamp_long$wavelength,sep="_")
 dup_ids_ref<-spectra_resamp_long$wvl_id[duplicated(spectra_resamp_long$wvl_id)]
 spectra_resamp_long_no_dups<-spectra_resamp_long[-which(spectra_resamp_long$wvl_id %in% dup_ids_ref),]
-inter_wvls<-350:2500
+wvl_range<-wvl_begin:wvl_end
 
 ## this function is for linear interpolation over the sensor overlap region
 interpolate <- function(x) {
   wvls <- x$wavelength
   ref <- x$reflectance
-  new_refs <- approx(wvls, ref, xout = inter_wvls)$y
-  tmp <- data_frame(wavelength = inter_wvls, reflectance = new_refs)
+  new_refs <- approx(wvls, ref, xout = wvl_range)$y
+  tmp <- data_frame(wavelength = wvl_range, reflectance = new_refs)
   return(tmp)
 }
 
@@ -157,7 +160,7 @@ spectra_cleaned<-reshape(data.frame(spectra_resamp_long_cleaned),
                          direction="wide")
 
 spectra_cleaned<-spectra(spectra_cleaned[,-1],
-                         bands=350:2500,
+                         bands=wvl_range,
                          names=spectra_cleaned[,1])
 dry_spectra<-match_sensors(spectra_cleaned,splice_at = 1005,interpolate_wvl = 10)
 
@@ -185,13 +188,13 @@ big_leaves<-names(dry_df_split)[which(spectra_types<2)]
 
 big_spectra<-dry_df[dry_df$specimen %in% big_leaves,]
 # average these!
-wvl_cols<-which(colnames(big_spectra) %in% 350:2500)
+wvl_cols<-which(colnames(big_spectra) %in% wvl_range)
 big_spectra_mean<-aggregate(big_spectra[,wvl_cols],
                             by=list(big_spectra$specimen),
                             FUN=try_keep_txt(mean))
 dry_spectra_big<-spectra(big_spectra_mean[,-1],
                          names=big_spectra_mean[,1],
-                         bands=350:2500)
+                         bands=wvl_range)
 
 ## perform corrections for the remainder (small leaves)
 
@@ -207,7 +210,7 @@ spectralon_ref<-0.99
 
 small_leaves_corr<-lapply(small_leaves_avg,
                                function(sample){
-                                 wvl_cols<-which(colnames(sample) %in% 350:2500)
+                                 wvl_cols<-which(colnames(sample) %in% wvl_range)
                                    
                                  with_paper<-sample[sample$spectra_type=="array filter paper",wvl_cols]
                                  without_paper<-sample[sample$spectra_type=="target",wvl_cols]
@@ -221,8 +224,11 @@ small_leaves_corr<-lapply(small_leaves_avg,
 small_leaves_corr_list<-lapply(small_leaves_corr,function(x) x[[2]])
 small_leaves_corr_df<-do.call(rbind.data.frame,small_leaves_corr_list)
 
-dry_spectra_small<-spectra(small_leaves_corr_df,bands = 350:2500,names = names(small_leaves_corr))
-meta(dry_spectra_small)$gap_fraction<-unlist(lapply(small_leaves_corr,function(x) x[[1]]))
+dry_spectra_small<-spectra(small_leaves_corr_df,
+                           bands = wvl_range,
+                           names = names(small_leaves_corr))
+meta(dry_spectra_small)$gap_fraction<-unlist(lapply(small_leaves_corr,
+                                                    function(x) x[[1]]))
 
 dry_spectra_processed<-spectrolab::combine(dry_spectra_big,dry_spectra_small)
 

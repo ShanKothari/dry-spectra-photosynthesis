@@ -52,7 +52,7 @@ data_summary$leaf_habit[data_summary$Species %in% evergreen]<-"evergreen"
 data_summary$pathway<-"C3"
 data_summary$pathway[data_summary$Species=="Zea mays"]<-"C4"
 
-write.csv(data_summary,"ProcessedData/data_summary_processed.csv",row.names=F)
+# write.csv(data_summary,"ProcessedData/data_summary_processed.csv",row.names=F)
 
 #############################################
 ## gas exchange and chlorophyll fluorescence data
@@ -133,6 +133,12 @@ load("ProcessedData/LamourAnalyses/2_Fitted_ACi_data.Rdata")
 
 fresh_spectra<-readRDS("ProcessedData/fresh_spectra_processed.rds")
 dry_spectra<-readRDS("ProcessedData/dry_spectra_processed.rds")
+
+## note: dry samples were scanned with labels "PIST 2 sun"
+## and "PIST2 sun". currently we use only the latter
+## they are presumably the same sample, just mistakenly
+## measured twice
+dry_spectra<-dry_spectra[-which(names(dry_spectra)=="PIST 2 sun")]
 
 summary_match_fresh<-match(meta(fresh_spectra)$sample_name,data_summary$SpectraName)
 meta(fresh_spectra)$SampleID<-data_summary$ID[summary_match_fresh]
