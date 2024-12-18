@@ -140,7 +140,7 @@ dry_spectra<-readRDS("ProcessedData/dry_spectra_processed.rds")
 ## measured twice
 dry_spectra<-dry_spectra[-which(names(dry_spectra)=="PIST 2 sun")]
 
-summary_match_fresh<-match(meta(fresh_spectra)$sample_name,data_summary$SpectraName)
+summary_match_fresh<-match(meta(fresh_spectra)$sample_id,data_summary$SpectraName)
 meta(fresh_spectra)$SampleID<-data_summary$ID[summary_match_fresh]
 meta(fresh_spectra)$Species<-data_summary$Species[summary_match_fresh]
 meta(fresh_spectra)$LDMC<-data_summary$LDMC[summary_match_fresh]
@@ -159,11 +159,8 @@ meta(fresh_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_fresh]
 bilan_match_fresh<-match(meta(fresh_spectra)$SampleID,Bilan$SampleID)
 meta(fresh_spectra)$Vcmax25<-Bilan$Vcmax25[bilan_match_fresh]
 
-## unit-vector normalization
-fresh_spectra_norm<-normalize(fresh_spectra)
-
 ## attach to dry spectra...
-summary_match_dry<-match(meta(dry_spectra)$sample_name,data_summary$SpectraName)
+summary_match_dry<-match(meta(dry_spectra)$sample_id,data_summary$DrySpectraName)
 meta(dry_spectra)$SampleID<-data_summary$ID[summary_match_dry]
 meta(dry_spectra)$Species<-data_summary$Species[summary_match_dry]
 meta(dry_spectra)$LDMC<-data_summary$LDMC[summary_match_dry]
@@ -182,5 +179,6 @@ meta(dry_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_dry]
 bilan_match_dry<-match(meta(dry_spectra)$SampleID,Bilan$SampleID)
 meta(dry_spectra)$Vcmax25<-Bilan$Vcmax25[bilan_match_dry]
 
-## unit-vector normalization
-dry_spectra_norm<-normalize(dry_spectra)
+## write processed files
+saveRDS(fresh_spectra,"ProcessedData/fresh_spectra_and_traits.rds")
+saveRDS(dry_spectra,"ProcessedData/dry_spectra_and_traits.rds")

@@ -55,7 +55,7 @@ all_spectra_files<-all_spectra_files[-which(grepl("Second",all_spectra_files))]
 
 ## get information about samples from file paths
 all_spectra_files_split<-strsplit(all_spectra_files,split="/")
-sample_names<-unlist(lapply(all_spectra_files_split,
+sample_ids<-unlist(lapply(all_spectra_files_split,
                             function(x) x[[2]]))
 measurement_names<-unlist(lapply(all_spectra_files_split,
                                  function(x) x[[3]]))
@@ -70,7 +70,7 @@ all_spectra<-spectra(all_reflectance_df,
                      bands = 350:1000,
                      names = measurement_names)
 
-meta(all_spectra)$sample_name<-sample_names
+meta(all_spectra)$sample_id<-sample_ids
 meta(all_spectra)$dummy<-NA
 
 ## filtering obviously bad data
@@ -84,7 +84,7 @@ all_spectra<-all_spectra[,400:900]
 
 ## averaging by sample
 all_spectra_avg<-aggregate(all_spectra,
-                           by=meta(all_spectra)$sample_name,
+                           by=meta(all_spectra)$sample_id,
                            FUN=try_keep_txt(mean))
 
 saveRDS(all_spectra_avg,"ProcessedData/fresh_spectra_processed.rds")
@@ -180,22 +180,22 @@ dry_spectra<-dry_spectra[!(meta(dry_spectra)$spectra_type=="only filter paper"),
 
 # split 'good' leaf (and leaf + filter paper) spectra by specimen 
 dry_df<-as.data.frame(dry_spectra)
-dry_df_split<-split(dry_df, f = dry_df$specimen)
+dry_df_split<-split(dry_df, f = dry_df$sample_id)
 
 ## which leaves have only target spectra (no filter paper)? (big leaves)
 spectra_types<-unlist(lapply(dry_df_split,function(x) length(unique(x$spectra_type))))
 big_leaves<-names(dry_df_split)[which(spectra_types<2)]
 
-big_spectra<-dry_df[dry_df$specimen %in% big_leaves,]
+big_spectra<-dry_df[dry_df$sample_id %in% big_leaves,]
 # average!
 big_spectra_mean<-aggregate(big_spectra,
-                            by=list(big_spectra$specimen),
+                            by=list(big_spectra$sample_id),
                             FUN=try_keep_txt(mean))
 
 dry_spectra_big<-spectra(big_spectra_mean[,which(colnames(big_spectra_mean) %in% wvl_range)],
-                         names=big_spectra_mean$sample_name,
+                         names=big_spectra_mean$sample_id,
                          bands=wvl_range,
-                         meta = data.frame(specimen = big_spectra_mean$specimen))
+                         meta = data.frame(sample_id = big_spectra_mean$sample_id))
 
 ## perform corrections for the remainder (small leaves)
 
@@ -220,8 +220,8 @@ small_leaves_corr<-lapply(small_leaves_avg,
                                  gap_fraction<-(with_paper[wvl_400]-without_paper[wvl_400])*spectralon_ref/filter_spectra_avg[wvl_400]
                                  corr_spec<-without_paper*spectralon_ref/(1-as.numeric(gap_fraction))
                                  
-                                 specimen<-sample$specimen[[1]]
-                                 return(list(gap_fraction,specimen,corr_spec))
+                                 sample_id<-sample$sample_id[[1]]
+                                 return(list(gap_fraction,sample_id,corr_spec))
                                })
 
 small_leaves_corr_list<-lapply(small_leaves_corr,function(x) x[[3]])
@@ -231,7 +231,7 @@ dry_spectra_small<-spectra(small_leaves_corr_df,
                            bands = wvl_range,
                            names = names(small_leaves_corr))
 
-meta(dry_spectra_small)$specimen<-unlist(lapply(small_leaves_corr,
+meta(dry_spectra_small)$sample_id<-unlist(lapply(small_leaves_corr,
                                                     function(x) x[[2]]))
 meta(dry_spectra_small)$gap_fraction<-unlist(lapply(small_leaves_corr,
                                                     function(x) x[[1]]))
