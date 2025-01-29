@@ -40,6 +40,26 @@ ggplot(LDMC_val_pred,aes(y=measured,x=val_pred))+
   labs(y="Measured",x="Predicted")+
   ggtitle("Predicting LDMC")
 
+## EWT
+EWT_model<-plsr(meta(spectra_train)$EWT~as.matrix(spectra_train),
+                ncomp=30,method = "oscorespls",validation="CV",segments=10)
+
+ncomp_EWT <- selectNcomp(EWT_model, method = "onesigma", plot = FALSE)
+
+EWT_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
+                         val_pred=predict(EWT_model,newdata=as.matrix(spectra_test),ncomp=ncomp_EWT)[,,1],
+                         measured=meta(spectra_test)$EWT)
+
+ggplot(EWT_val_pred,aes(y=measured,x=val_pred))+
+  geom_point(size=2)+geom_smooth(method="lm",se=F)+
+  theme_bw()+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  coord_cartesian(xlim=c(0,0.3),ylim=c(0.,0.3))+
+  theme(text = element_text(size=20),
+        legend.position = c(0.8, 0.2))+
+  labs(y="Measured",x="Predicted")+
+  ggtitle("Predicting EWT")
+
 ## LMA
 LMA_model<-plsr(meta(spectra_train)$LMA~as.matrix(spectra_train),
                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
@@ -98,9 +118,9 @@ ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
   ggtitle("Predicting Vcmax25")
 
 ###########################################################################
-## non-normalized, without conifers
+## non-normalized, without needleleaf or scaleleaf conifers
 
-dry_spectra_nc<-dry_spectra[!meta(dry_spectra)$leaf_type=="needleleaf",]
+dry_spectra_nc<-dry_spectra[!meta(dry_spectra)$leaf_type %in% c("needleleaf","scaleleaf"),]
 
 ## split training and testing data
 train_sample <- createDataPartition(
@@ -180,6 +200,7 @@ Vcmax25_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
                              val_pred=predict(Vcmax25_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Vcmax25)[,,1],
                              measured=meta(spectra_test)$Vcmax25)
 
+mylims <- range(with(Vcmax25_val_pred, c(measured, val_pred)), na.rm = T)
 ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
   geom_point(size=2)+geom_smooth(method="lm",se=F)+
   theme_bw()+
@@ -187,7 +208,8 @@ ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
   theme(text = element_text(size=20),
         legend.position = c(0.8, 0.2))+
   labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Vcmax25")
+  ggtitle("Predicting Vcmax25")+
+  coord_cartesian(xlim = mylims, ylim = mylims)
 
 #########################
 ## brightness-normalized

@@ -26,6 +26,8 @@ area_match_fresh<-match(data_summary$SpectraName,area_data$SpectraName)
 data_summary$area<-area_data$Area..in2.[area_match_fresh]*2.54^2
 ## g per sq cm to g per sq m
 data_summary$LMA<-data_summary$Dry.weight..g./data_summary$area*10000
+## calculate EWT in mm
+data_summary$EWT<-(data_summary$Fresh.weight..g.-data_summary$Dry.weight..g.)/data_summary$area*10
 
 ## classifications of species into groups
 needleleaf<-c("Abies balsamea","Larix laricina","Larix decidua",
@@ -145,6 +147,7 @@ meta(fresh_spectra)$SampleID<-data_summary$ID[summary_match_fresh]
 meta(fresh_spectra)$Species<-data_summary$Species[summary_match_fresh]
 meta(fresh_spectra)$LDMC<-data_summary$LDMC[summary_match_fresh]
 meta(fresh_spectra)$LMA<-data_summary$LMA[summary_match_fresh]
+meta(fresh_spectra)$EWT<-data_summary$EWT[summary_match_fresh]
 meta(fresh_spectra)$leaf_type<-data_summary$leaf_type[summary_match_fresh]
 meta(fresh_spectra)$pubescent<-data_summary$pubescent[summary_match_fresh]
 meta(fresh_spectra)$leaf_habit<-data_summary$leaf_habit[summary_match_fresh]
@@ -165,6 +168,7 @@ meta(dry_spectra)$SampleID<-data_summary$ID[summary_match_dry]
 meta(dry_spectra)$Species<-data_summary$Species[summary_match_dry]
 meta(dry_spectra)$LDMC<-data_summary$LDMC[summary_match_dry]
 meta(dry_spectra)$LMA<-data_summary$LMA[summary_match_dry]
+meta(dry_spectra)$EWT<-data_summary$EWT[summary_match_dry]
 meta(dry_spectra)$leaf_type<-data_summary$leaf_type[summary_match_dry]
 meta(dry_spectra)$pubescent<-data_summary$pubescent[summary_match_dry]
 meta(dry_spectra)$leaf_habit<-data_summary$leaf_habit[summary_match_dry]
