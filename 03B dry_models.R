@@ -1,325 +1,111 @@
 setwd("C:/Users/Shan Kothari/Dropbox/PostdocProjects/PosadaSpectra/")
+source("Scripts/dry-spectra-photosynthesis/00 useful_functions.R")
 
 library(spectrolab)
 library(caret)
 library(pls)
 
+##################################################################
+## read data and set parameters
+
 dry_spectra<-readRDS("ProcessedData/dry_spectra_and_traits.rds")
-dry_spectra_norm<-normalize(dry_spectra)
 
-###########################################################################
-## non-normalized
+repeats <- 50    # repeats of nested CV
+outer_folds <- 5       # number of outer folds
+max_comps <- 20    # maximum PLS components to test
 
-## split training and testing data
-train_sample <- createDataPartition(
-  y = meta(dry_spectra)$Species,
-  p = .6,
-  list = FALSE
-)
-
-spectra_train<-dry_spectra[train_sample]
-spectra_test<-dry_spectra[-train_sample]
-
-## LDMC
-LDMC_model<-plsr(meta(spectra_train)$LDMC~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_LDMC <- selectNcomp(LDMC_model, method = "onesigma", plot = FALSE)
-
-LDMC_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(LDMC_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LDMC)[,,1],
-                          measured=meta(spectra_test)$LDMC)
-
-ggplot(LDMC_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  coord_cartesian(xlim=c(0.20,0.5),ylim=c(0.20,0.5))+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LDMC")
-
-## EWT
-EWT_model<-plsr(meta(spectra_train)$EWT~as.matrix(spectra_train),
-                ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_EWT <- selectNcomp(EWT_model, method = "onesigma", plot = FALSE)
-
-EWT_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                         val_pred=predict(EWT_model,newdata=as.matrix(spectra_test),ncomp=ncomp_EWT)[,,1],
-                         measured=meta(spectra_test)$EWT)
-
-ggplot(EWT_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  coord_cartesian(xlim=c(0,0.3),ylim=c(0.,0.3))+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting EWT")
-
-## LMA
-LMA_model<-plsr(meta(spectra_train)$LMA~as.matrix(spectra_train),
-                ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_LMA <- selectNcomp(LMA_model, method = "onesigma", plot = FALSE)
-
-LMA_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                         val_pred=predict(LMA_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LMA)[,,1],
-                         measured=meta(spectra_test)$LMA)
-
-ggplot(LMA_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LMA")
+######################################
+## apply repeated nested CV to each trait
 
 ## Asat
-Asat_model<-plsr(meta(spectra_train)$Asat~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
+Asat_preds<-plsr_rnCV(repeats = repeats,
+                      outer_folds = outer_folds,
+                      max_comps = max_comps,
+                      yvar=meta(dry_spectra)$Asat,
+                      xmat=as.matrix(dry_spectra))
 
-ncomp_Asat <- selectNcomp(Asat_model, method = "onesigma", plot = FALSE)
-
-Asat_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(Asat_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Asat)[,,1],
-                          measured=meta(spectra_test)$Asat)
-
-ggplot(Asat_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Asat")
-
-## Vcmax25
-Vcmax25_model<-plsr(meta(spectra_train)$Vcmax25~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_Vcmax25 <- selectNcomp(Vcmax25_model, method = "onesigma", plot = FALSE)
-
-Vcmax25_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(Vcmax25_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Vcmax25)[,,1],
-                          measured=meta(spectra_test)$Vcmax25)
-
-ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Vcmax25")
-
-###########################################################################
-## non-normalized, without needleleaf or scaleleaf conifers
-
-dry_spectra_nc<-dry_spectra[!meta(dry_spectra)$leaf_type %in% c("needleleaf","scaleleaf"),]
-
-## split training and testing data
-train_sample <- createDataPartition(
-  y = meta(dry_spectra_nc)$Species,
-  p = .6,
-  list = FALSE
+Asat_plot_df <- data.frame(
+  measured = meta(dry_spectra)$Asat,
+  pred_mean = rowMeans(Asat_preds$pred_matrix),
+  pred_sd   = apply(Asat_preds$pred_matrix, 1, sd)
 )
 
-spectra_train<-dry_spectra_nc[train_sample]
-spectra_test<-dry_spectra_nc[-train_sample]
+Asat_lims <- c(min(c(Asat_plot_df$measured,
+                     Asat_plot_df$pred_mean-Asat_plot_df$pred_sd),na.rm=T),
+               max(c(Asat_plot_df$measured,
+                     Asat_plot_df$pred_mean+Asat_plot_df$pred_sd),na.rm=T))
 
-## LDMC
-LDMC_model<-plsr(meta(spectra_train)$LDMC~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_LDMC <- selectNcomp(LDMC_model, method = "onesigma", plot = FALSE)
-
-LDMC_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(LDMC_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LDMC)[,,1],
-                          measured=meta(spectra_test)$LDMC)
-
-ggplot(LDMC_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
+ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
   geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  coord_cartesian(xlim=c(0.20,0.5),ylim=c(0.20,0.5))+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LDMC")
-
-## LMA
-LMA_model<-plsr(meta(spectra_train)$LMA~as.matrix(spectra_train),
-                ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_LMA <- selectNcomp(LMA_model, method = "onesigma", plot = FALSE)
-
-LMA_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                         val_pred=predict(LMA_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LMA)[,,1],
-                         measured=meta(spectra_test)$LMA)
-
-ggplot(LMA_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LMA")
-
-## Asat
-Asat_model<-plsr(meta(spectra_train)$Asat~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_Asat <- selectNcomp(Asat_model, method = "onesigma", plot = FALSE)
-
-Asat_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(Asat_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Asat)[,,1],
-                          measured=meta(spectra_test)$Asat)
-
-mylims <- range(with(Asat_val_pred, c(measured, val_pred)), na.rm = T)
-ggplot(Asat_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured Asat",x="Predicted Asat")+
-  ggtitle("Pressed leaves")+
-  coord_cartesian(xlim = mylims, ylim = mylims)
-
-## Vcmax25
-Vcmax25_model<-plsr(meta(spectra_train)$Vcmax25~as.matrix(spectra_train),
-                    ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_Vcmax25 <- selectNcomp(Vcmax25_model, method = "onesigma", plot = FALSE)
-
-Vcmax25_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                             val_pred=predict(Vcmax25_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Vcmax25)[,,1],
-                             measured=meta(spectra_test)$Vcmax25)
-
-mylims <- range(with(Vcmax25_val_pred, c(measured, val_pred)), na.rm = T)
-ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured Vcmax25",x="Predicted Vcmax25")+
-  ggtitle("Pressed leaves")+
-  coord_cartesian(xlim = mylims, ylim = mylims)
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
+  labs(y = "Measured Asat",
+       x = "Predicted Asat")
 
 ## ETR
-ETR_model<-plsr(meta(spectra_train)$ETR~as.matrix(spectra_train),
-                    ncomp=30,method = "oscorespls",validation="CV",segments=10)
+ETR_preds<-plsr_rnCV(repeats = repeats,
+                      outer_folds = outer_folds,
+                      max_comps = max_comps,
+                      yvar=meta(dry_spectra)$ETR,
+                      xmat=as.matrix(dry_spectra))
 
-ncomp_ETR <- selectNcomp(ETR_model, method = "onesigma", plot = FALSE)
-
-ETR_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                             val_pred=predict(ETR_model,newdata=as.matrix(spectra_test),ncomp=ncomp_ETR)[,,1],
-                             measured=meta(spectra_test)$ETR)
-
-mylims <- range(with(ETR_val_pred, c(measured, val_pred)), na.rm = T)
-ggplot(ETR_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured ETR",x="Predicted ETR")+
-  ggtitle("Pressed leaves")+
-  coord_cartesian(xlim = mylims, ylim = mylims)
-
-#########################
-## brightness-normalized
-
-## split training and testing data
-train_sample <- createDataPartition(
-  y = meta(dry_spectra_norm)$Species,
-  p = .6,
-  list = FALSE
+ETR_plot_df <- data.frame(
+  measured = meta(dry_spectra)$ETR,
+  pred_mean = rowMeans(ETR_preds$pred_matrix),
+  pred_sd   = apply(ETR_preds$pred_matrix, 1, sd)
 )
 
-spectra_train<-dry_spectra_norm[train_sample]
-spectra_test<-dry_spectra_norm[-train_sample]
+ETR_lims <- c(min(c(ETR_plot_df$measured,
+                     ETR_plot_df$pred_mean-ETR_plot_df$pred_sd),na.rm=T),
+               max(c(ETR_plot_df$measured,
+                     ETR_plot_df$pred_mean+ETR_plot_df$pred_sd),na.rm=T))
 
-## LDMC
-LDMC_model<-plsr(meta(spectra_train)$LDMC~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_LDMC <- selectNcomp(LDMC_model, method = "onesigma", plot = FALSE)
-
-LDMC_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(LDMC_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LDMC)[,,1],
-                          measured=meta(spectra_test)$LDMC)
-
-ggplot(LDMC_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
+ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
   geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  coord_cartesian(xlim=c(0.20,0.5),ylim=c(0.20,0.5))+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LDMC")
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
+  labs(y = "Measured ETR",
+       x = "Predicted ETR")
 
-## LMA
-LMA_model<-plsr(meta(spectra_train)$LMA~as.matrix(spectra_train),
-                ncomp=30,method = "oscorespls",validation="CV",segments=10)
+## Rd
+Rd_preds<-plsr_rnCV(repeats = repeats,
+                     outer_folds = outer_folds,
+                     max_comps = max_comps,
+                     yvar=meta(dry_spectra)$Rd,
+                     xmat=as.matrix(dry_spectra))
 
-ncomp_LMA <- selectNcomp(LMA_model, method = "onesigma", plot = FALSE)
+Rd_plot_df <- data.frame(
+  measured = meta(dry_spectra)$Rd,
+  pred_mean = rowMeans(Rd_preds$pred_matrix),
+  pred_sd   = apply(Rd_preds$pred_matrix, 1, sd)
+)
 
-LMA_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                         val_pred=predict(LMA_model,newdata=as.matrix(spectra_test),ncomp=ncomp_LMA)[,,1],
-                         measured=meta(spectra_test)$LMA)
+Rd_lims <- c(min(c(Rd_plot_df$measured,
+                    Rd_plot_df$pred_mean-Rd_plot_df$pred_sd),na.rm=T),
+              max(c(Rd_plot_df$measured,
+                    Rd_plot_df$pred_mean+Rd_plot_df$pred_sd),na.rm=T))
 
-ggplot(LMA_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
+ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
   geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting LMA")
-
-## Asat
-Asat_model<-plsr(meta(spectra_train)$Asat~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_Asat <- selectNcomp(Asat_model, method = "onesigma", plot = FALSE)
-
-Asat_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(Asat_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Asat)[,,1],
-                          measured=meta(spectra_test)$Asat)
-
-ggplot(Asat_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Asat")
-
-## Vcmax25
-Vcmax25_model<-plsr(meta(spectra_train)$Vcmax25~as.matrix(spectra_train),
-                 ncomp=30,method = "oscorespls",validation="CV",segments=10)
-
-ncomp_Vcmax25 <- selectNcomp(Vcmax25_model, method = "onesigma", plot = FALSE)
-
-Vcmax25_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
-                          val_pred=predict(Vcmax25_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Vcmax25)[,,1],
-                          measured=meta(spectra_test)$Vcmax25)
-
-ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
-  geom_point(size=2)+geom_smooth(method="lm",se=F)+
-  theme_bw()+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  theme(text = element_text(size=20),
-        legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Vcmax25")
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
+  labs(y = "Measured Rd",
+       x = "Predicted Rd")
