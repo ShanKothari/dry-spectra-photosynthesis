@@ -236,6 +236,13 @@ meta(dry_spectra_small)$sample_id<-unlist(lapply(small_leaves_corr,
 meta(dry_spectra_small)$gap_fraction<-unlist(lapply(small_leaves_corr,
                                                     function(x) x[[1]]))
 
+## remove very high or very low reflectance
+dry_spectra_small<-dry_spectra_small[-which(dry_spectra_small[,1100]>0.6 | dry_spectra_small[,1100]<0.35)]
+## remove very low fractional coverage (high gap fraction)
+dry_spectra_small<-dry_spectra_small[-which(meta(dry_spectra_small)$gap_fraction>0.7)]
+
+## combine and trim spectral range
 dry_spectra_processed<-spectrolab::combine(dry_spectra_big,dry_spectra_small)
+dry_spectra_processed<-dry_spectra_processed[,400:2500]
 
 saveRDS(dry_spectra_processed,"ProcessedData/dry_spectra_processed.rds")
