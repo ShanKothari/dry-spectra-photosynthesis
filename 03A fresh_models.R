@@ -8,6 +8,24 @@ fresh_spectra<-readRDS("ProcessedData/fresh_spectra_and_traits.rds")
 ## unit-vector normalization
 fresh_spectra_norm<-normalize(fresh_spectra)
 
+############################################
+## useful functions
+
+## root mean squared deviation
+RMSD<-function(measured,predicted){
+  not.na<-which(!is.na(measured) & !is.na(predicted))
+  return(sqrt(sum((measured-predicted)^2,na.rm=T)/(length(not.na)-1)))
+}
+
+## percent RMSD (based on data quantiles)
+## set min and max to 0 and 1 for range as denominator
+## or to 0.25 and 0.75 for IQR as denominator
+percentRMSD<-function(measured,predicted,min,max,na.rm=T){
+  RMSD_data<-RMSD(measured,predicted)
+  range<-unname(quantile(measured,probs=max,na.rm=na.rm)-quantile(measured,probs=min,na.rm=na.rm))
+  return(RMSD_data/range)
+}
+
 ###########################################################################
 ## non-normalized, drop needleleaves
 
@@ -235,3 +253,82 @@ ggplot(ETR_val_pred,aes(y=measured,x=val_pred))+
         legend.position = c(0.8, 0.2))+
   labs(y="Measured",x="Predicted")+
   ggtitle("Predicting ETR")
+
+###############################################
+## trying repeated nested cross-validation
+
+repeats <- 50    # repeats of nested CV
+outer_folds <- 5       # number of outer folds
+max_comps <- 20    # maximum PLS components to test
+nsamp <- dim(fresh_spectra)[1]
+
+# to store results from every single outer fold across all repeats
+all_r2 <- matrix(NA, nrow = repeats, ncol = outer_folds)
+all_rmse <- matrix(NA, nrow = repeats, ncol = outer_folds)
+all_ncomp <- matrix(NA, nrow = repeats, ncol = outer_folds)
+# matrix to store predictions for each sample
+pred_matrix <- matrix(NA, nrow = nsamp, ncol = repeats)
+
+# outside loop that gets repeated
+for(r in 1:repeats) {
+  
+  # create new random folds for this repetition
+  folds_outer <- sample(cut(seq(1, nsamp), breaks = outer_folds, labels = FALSE))
+  
+  for(i in 1:outer_folds) {
+    # the ith fold is reserved for testing
+    test_idx <- which(folds_outer == i)
+    train_data <- fresh_spectra[-test_idx, ]
+    test_data  <- fresh_spectra[test_idx, ]
+    
+    # plsr built-in CV acts as our inner loop
+    inner_model <- plsr(meta(train_data)$Asat ~ as.matrix(train_data),
+                        ncomp = max_comps, 
+                        validation = "CV", 
+                        segments = 10)
+    
+    # select n comp from inner loop with one-sigma rule
+    # to use for prediction in outer loop
+    best_ncomp <- selectNcomp(inner_model, method = "onesigma", plot = FALSE)
+    if(best_ncomp == 0) best_ncomp <- 1 ## minimum of one component
+    
+    # outer loop evaluation
+    preds <- predict(inner_model, newdata = as.matrix(test_data), ncomp = best_ncomp)
+    # save predictions for these test data in this repeat
+    pred_matrix[test_idx, r] <- preds
+    
+    # calculate R-squared (or RMSEP)
+    # there are NAs in the measured values so we just drop those
+    all_r2[r,i] <- cor(preds, meta(test_data)$Asat,
+                           use="complete.obs")^2
+    all_rmse[r,i] <- RMSD(preds,meta(test_data)$Asat)
+    all_ncomp[r,i] <- best_ncomp
+  }
+  message(sprintf("Completed Repetition %d/%d", r, repeats))
+}
+
+# 4. Final Performance Summary
+cat("\n--- Final Unbiased Evaluation ---\n")
+cat(sprintf("Median R2: %.3f\n", median(all_r2)))
+cat(sprintf("95%% quantiles: %.3f - %.3f\n", 
+            quantile(all_r2,probs = 0.025), 
+            quantile(all_r2,probs = 0.975)))
+
+plot_df <- data.frame(
+  measured = meta(fresh_spectra)$Asat,
+  pred_mean = rowMeans(pred_matrix),
+  pred_sd   = apply(pred_matrix, 1, sd)
+)
+
+ggplot(plot_df, aes(y = measured, x = pred_mean)) +
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "gray") +
+  geom_point(size = 2, color="blue") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", size=2) +
+  theme_minimal() +
+  labs(y = "Measured Asat",
+       x = "Predicted Asat")
+  # annotate("text", x = min(y), y = max(y), 
+  #          label = paste("Avg R2 =", round(mean(cor(pred_matrix, y)^2), 3)),
+  #          hjust = 0, vjust = 1, fontface = "italic")
