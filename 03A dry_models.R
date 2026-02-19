@@ -30,10 +30,7 @@ Asat_plot_df <- data.frame(
   pred_sd   = apply(Asat_preds$pred_matrix, 1, sd)
 )
 
-Asat_lims <- c(min(c(Asat_plot_df$measured,
-                     Asat_plot_df$pred_mean-Asat_plot_df$pred_sd),na.rm=T),
-               max(c(Asat_plot_df$measured,
-                     Asat_plot_df$pred_mean+Asat_plot_df$pred_sd),na.rm=T))
+Asat_lims <- define_lims(Asat_plot_df)
 
 ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
@@ -61,10 +58,7 @@ ETR_plot_df <- data.frame(
   pred_sd   = apply(ETR_preds$pred_matrix, 1, sd)
 )
 
-ETR_lims <- c(min(c(ETR_plot_df$measured,
-                     ETR_plot_df$pred_mean-ETR_plot_df$pred_sd),na.rm=T),
-               max(c(ETR_plot_df$measured,
-                     ETR_plot_df$pred_mean+ETR_plot_df$pred_sd),na.rm=T))
+ETR_lims <- define_lims(ETR_plot_df)
 
 ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
@@ -92,10 +86,7 @@ Rd_plot_df <- data.frame(
   pred_sd   = apply(Rd_preds$pred_matrix, 1, sd)
 )
 
-Rd_lims <- c(min(c(Rd_plot_df$measured,
-                    Rd_plot_df$pred_mean-Rd_plot_df$pred_sd),na.rm=T),
-              max(c(Rd_plot_df$measured,
-                    Rd_plot_df$pred_mean+Rd_plot_df$pred_sd),na.rm=T))
+Rd_lims <- define_lims(Rd_plot_df)
 
 ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
