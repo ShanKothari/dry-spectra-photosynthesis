@@ -181,14 +181,16 @@ Asat_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
                           val_pred=predict(Asat_model,newdata=as.matrix(spectra_test),ncomp=ncomp_Asat)[,,1],
                           measured=meta(spectra_test)$Asat)
 
+mylims <- range(with(Asat_val_pred, c(measured, val_pred)), na.rm = T)
 ggplot(Asat_val_pred,aes(y=measured,x=val_pred))+
   geom_point(size=2)+geom_smooth(method="lm",se=F)+
   theme_bw()+
   geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
   theme(text = element_text(size=20),
         legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Asat")
+  labs(y="Measured Asat",x="Predicted Asat")+
+  ggtitle("Pressed leaves")+
+  coord_cartesian(xlim = mylims, ylim = mylims)
 
 ## Vcmax25
 Vcmax25_model<-plsr(meta(spectra_train)$Vcmax25~as.matrix(spectra_train),
@@ -207,8 +209,29 @@ ggplot(Vcmax25_val_pred,aes(y=measured,x=val_pred))+
   geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
   theme(text = element_text(size=20),
         legend.position = c(0.8, 0.2))+
-  labs(y="Measured",x="Predicted")+
-  ggtitle("Predicting Vcmax25")+
+  labs(y="Measured Vcmax25",x="Predicted Vcmax25")+
+  ggtitle("Pressed leaves")+
+  coord_cartesian(xlim = mylims, ylim = mylims)
+
+## ETR
+ETR_model<-plsr(meta(spectra_train)$ETR~as.matrix(spectra_train),
+                    ncomp=30,method = "oscorespls",validation="CV",segments=10)
+
+ncomp_ETR <- selectNcomp(ETR_model, method = "onesigma", plot = FALSE)
+
+ETR_val_pred<-data.frame(sample=meta(spectra_test)$sample_id,
+                             val_pred=predict(ETR_model,newdata=as.matrix(spectra_test),ncomp=ncomp_ETR)[,,1],
+                             measured=meta(spectra_test)$ETR)
+
+mylims <- range(with(ETR_val_pred, c(measured, val_pred)), na.rm = T)
+ggplot(ETR_val_pred,aes(y=measured,x=val_pred))+
+  geom_point(size=2)+geom_smooth(method="lm",se=F)+
+  theme_bw()+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  theme(text = element_text(size=20),
+        legend.position = c(0.8, 0.2))+
+  labs(y="Measured ETR",x="Predicted ETR")+
+  ggtitle("Pressed leaves")+
   coord_cartesian(xlim = mylims, ylim = mylims)
 
 #########################
