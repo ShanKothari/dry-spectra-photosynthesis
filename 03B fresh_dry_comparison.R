@@ -20,24 +20,21 @@ max_comps <- 20    # maximum PLS components to test
 ## apply to individual traits
 
 ## Asat
-Asat_preds<-plsr_rnCV(repeats = repeats,
-                      outer_folds = outer_folds,
-                      max_comps = max_comps,
-                      yvar=meta(fresh_spectra_sub)$Asat,
-                      xmat=as.matrix(fresh_spectra_sub))
+Asat_fresh_preds<-plsr_rnCV(repeats = repeats,
+                            outer_folds = outer_folds,
+                            max_comps = max_comps,
+                            yvar=meta(fresh_spectra_sub)$Asat,
+                            xmat=as.matrix(fresh_spectra_sub))
 
-Asat_plot_df <- data.frame(
+Asat_fresh_plot_df <- data.frame(
   measured = meta(fresh_spectra_sub)$Asat,
-  pred_mean = rowMeans(Asat_preds$pred_matrix),
-  pred_sd   = apply(Asat_preds$pred_matrix, 1, sd)
+  pred_mean = rowMeans(Asat_fresh_preds$pred_matrix),
+  pred_sd   = apply(Asat_fresh_preds$pred_matrix, 1, sd)
 )
 
-Asat_lims <- c(min(c(Asat_plot_df$measured,
-                     Asat_plot_df$pred_mean-Asat_plot_df$pred_sd),na.rm=T),
-               max(c(Asat_plot_df$measured,
-                     Asat_plot_df$pred_mean+Asat_plot_df$pred_sd),na.rm=T))
+Asat_fresh_lims <- define_lims(Asat_fresh_plot_df)
 
-ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
+ggplot(Asat_fresh_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -46,29 +43,26 @@ ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
+  coord_cartesian(xlim=Asat_fresh_lims,ylim=Asat_fresh_lims)+
   labs(y = "Measured Asat",
        x = "Predicted Asat")
 
 ## ETR
-ETR_preds<-plsr_rnCV(repeats = repeats,
-                     outer_folds = outer_folds,
-                     max_comps = max_comps,
-                     yvar=meta(fresh_spectra_sub)$ETR,
-                     xmat=as.matrix(fresh_spectra_sub))
+ETR_fresh_preds<-plsr_rnCV(repeats = repeats,
+                           outer_folds = outer_folds,
+                           max_comps = max_comps,
+                           yvar=meta(fresh_spectra_sub)$ETR,
+                           xmat=as.matrix(fresh_spectra_sub))
 
-ETR_plot_df <- data.frame(
+ETR_fresh_plot_df <- data.frame(
   measured = meta(fresh_spectra_sub)$ETR,
-  pred_mean = rowMeans(ETR_preds$pred_matrix),
-  pred_sd   = apply(ETR_preds$pred_matrix, 1, sd)
+  pred_mean = rowMeans(ETR_fresh_preds$pred_matrix),
+  pred_sd   = apply(ETR_fresh_preds$pred_matrix, 1, sd)
 )
 
-ETR_lims <- c(min(c(ETR_plot_df$measured,
-                    ETR_plot_df$pred_mean-ETR_plot_df$pred_sd),na.rm=T),
-              max(c(ETR_plot_df$measured,
-                    ETR_plot_df$pred_mean+ETR_plot_df$pred_sd),na.rm=T))
+ETR_fresh_lims <- define_lims(ETR_fresh_plot_df)
 
-ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
+ggplot(ETR_fresh_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -77,29 +71,26 @@ ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
+  coord_cartesian(xlim=ETR_fresh_lims,ylim=ETR_fresh_lims)+
   labs(y = "Measured ETR",
        x = "Predicted ETR")
 
 ## Rd
-Rd_preds<-plsr_rnCV(repeats = repeats,
-                     outer_folds = outer_folds,
-                     max_comps = max_comps,
-                     yvar=meta(fresh_spectra_sub)$Rd,
-                     xmat=as.matrix(fresh_spectra_sub))
+Rd_fresh_preds<-plsr_rnCV(repeats = repeats,
+                          outer_folds = outer_folds,
+                          max_comps = max_comps,
+                          yvar=meta(fresh_spectra_sub)$Rd,
+                          xmat=as.matrix(fresh_spectra_sub))
 
-Rd_plot_df <- data.frame(
+Rd_fresh_plot_df <- data.frame(
   measured = meta(fresh_spectra_sub)$Rd,
-  pred_mean = rowMeans(Rd_preds$pred_matrix),
-  pred_sd   = apply(Rd_preds$pred_matrix, 1, sd)
+  pred_mean = rowMeans(Rd_fresh_preds$pred_matrix),
+  pred_sd   = apply(Rd_fresh_preds$pred_matrix, 1, sd)
 )
 
-Rd_lims <- c(min(c(Rd_plot_df$measured,
-                    Rd_plot_df$pred_mean-Rd_plot_df$pred_sd),na.rm=T),
-              max(c(Rd_plot_df$measured,
-                    Rd_plot_df$pred_mean+Rd_plot_df$pred_sd),na.rm=T))
+Rd_fresh_lims <- define_lims(Rd_fresh_plot_df)
 
-ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
+ggplot(Rd_fresh_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -108,6 +99,6 @@ ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
+  coord_cartesian(xlim=Rd_fresh_lims,ylim=Rd_fresh_lims)+
   labs(y = "Measured Rd",
        x = "Predicted Rd")

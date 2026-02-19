@@ -26,6 +26,7 @@ plsr_rnCV<-function(repeats, outer_folds, max_comps, yvar, xmat){
   # to store results from every single outer fold across all repeats
   all_r2 <- matrix(NA, nrow = repeats, ncol = outer_folds)
   all_rmse <- matrix(NA, nrow = repeats, ncol = outer_folds)
+  all_perrmse <- matrix(NA, nrow = repeats, ncol = outer_folds)
   all_ncomp <- matrix(NA, nrow = repeats, ncol = outer_folds)
   # matrix to store predictions for each sample
   pred_matrix <- matrix(NA, nrow = nrow(xmat), ncol = repeats)
@@ -80,4 +81,11 @@ plsr_rnCV<-function(repeats, outer_folds, max_comps, yvar, xmat){
               all_r2=all_r2,
               all_rmse=all_rmse,
               all_ncomp=all_ncomp))
+}
+
+## define limits for plotting
+define_lims<-function(plot_df){
+  low <- with(plot_df,min(c(measured,pred_mean-pred_sd),na.rm = T))
+  high <- with(plot_df,max(c(measured,pred_mean+pred_sd),na.rm = T))
+  return(c(low,high))
 }
