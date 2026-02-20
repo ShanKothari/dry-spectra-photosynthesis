@@ -80,6 +80,7 @@ plsr_rnCV<-function(repeats, outer_folds, max_comps, yvar, xmat){
   return(list(pred_matrix=pred_matrix,
               all_r2=all_r2,
               all_rmse=all_rmse,
+              all_perrmse=all_perrmse,
               all_ncomp=all_ncomp))
 }
 
