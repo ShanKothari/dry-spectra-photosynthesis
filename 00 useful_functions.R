@@ -89,3 +89,14 @@ define_lims<-function(plot_df){
   high <- with(plot_df,max(c(measured,pred_mean+pred_sd),na.rm = T))
   return(c(low,high))
 }
+
+define_lims_comparison<-function(dry_plot_df,fresh_plot_df){
+  dry_low <- with(dry_plot_df,min(c(measured,pred_mean-pred_sd),na.rm = T))
+  fresh_low <- with(fresh_plot_df,min(c(measured,pred_mean-pred_sd),na.rm = T))
+  low<-min(c(dry_low,fresh_low))
+  
+  dry_high <- with(dry_plot_df,max(c(measured,pred_mean+pred_sd),na.rm = T))
+  fresh_high <- with(fresh_plot_df,max(c(measured,pred_mean+pred_sd),na.rm = T))
+  high<-min(c(dry_high,fresh_high))
+  return(c(low,high))
+}

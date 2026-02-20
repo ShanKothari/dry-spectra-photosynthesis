@@ -35,22 +35,6 @@ Asat_fresh_plot_df <- data.frame(
   pred_sd   = apply(Asat_fresh_preds$pred_matrix, 1, sd)
 )
 
-Asat_fresh_lims <- define_lims(Asat_fresh_plot_df)
-
-Asat_fresh_plot <- ggplot(Asat_fresh_plot_df,
-                        aes(y = measured, x = pred_mean)) +
-  theme_bw()+
-  geom_point(size=2)+
-  geom_smooth(method="lm",se=F)+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
-                    xmax = pred_mean + pred_sd), 
-                alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Asat_fresh_lims,ylim=Asat_fresh_lims)+
-  labs(y = "Measured Asat",
-       x = "Predicted Asat")
-
 ## dry
 Asat_dry_preds<-plsr_rnCV(repeats = repeats,
                           outer_folds = outer_folds,
@@ -64,7 +48,21 @@ Asat_dry_plot_df <- data.frame(
   pred_sd   = apply(Asat_dry_preds$pred_matrix, 1, sd)
 )
 
-Asat_dry_lims <- define_lims(Asat_dry_plot_df)
+Asat_lims <- define_lims_comparison(Asat_dry_plot_df,Asat_fresh_plot_df)
+
+Asat_fresh_plot <- ggplot(Asat_fresh_plot_df,
+                          aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
+  labs(y = "Measured Asat",
+       x = "Predicted Asat")
 
 Asat_dry_plot <- ggplot(Asat_dry_plot_df,
                         aes(y = measured, x = pred_mean)) +
@@ -76,7 +74,7 @@ Asat_dry_plot <- ggplot(Asat_dry_plot_df,
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Asat_dry_lims,ylim=Asat_dry_lims)+
+  coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
   labs(y = "Measured Asat",
        x = "Predicted Asat")
 
@@ -96,22 +94,6 @@ Vcmax25_fresh_plot_df <- data.frame(
   pred_sd   = apply(Vcmax25_fresh_preds$pred_matrix, 1, sd)
 )
 
-Vcmax25_fresh_lims <- define_lims(Vcmax25_fresh_plot_df)
-
-Vcmax25_fresh_plot <- ggplot(Vcmax25_fresh_plot_df,
-                          aes(y = measured, x = pred_mean)) +
-  theme_bw()+
-  geom_point(size=2)+
-  geom_smooth(method="lm",se=F)+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
-                    xmax = pred_mean + pred_sd), 
-                alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Vcmax25_fresh_lims,ylim=Vcmax25_fresh_lims)+
-  labs(y = "Measured Vcmax25",
-       x = "Predicted Vcmax25")
-
 ## dry
 Vcmax25_dry_preds<-plsr_rnCV(repeats = repeats,
                              outer_folds = outer_folds,
@@ -125,7 +107,21 @@ Vcmax25_dry_plot_df <- data.frame(
   pred_sd   = apply(Vcmax25_dry_preds$pred_matrix, 1, sd)
 )
 
-Vcmax25_dry_lims <- define_lims(Vcmax25_dry_plot_df)
+Vcmax25_lims <- define_lims_comparison(Vcmax25_dry_plot_df,Vcmax25_fresh_plot_df)
+
+Vcmax25_fresh_plot <- ggplot(Vcmax25_fresh_plot_df,
+                             aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Vcmax25_lims,ylim=Vcmax25_lims)+
+  labs(y = "Measured Vcmax25",
+       x = "Predicted Vcmax25")
 
 Vcmax25_dry_plot <- ggplot(Vcmax25_dry_plot_df,
                            aes(y = measured, x = pred_mean)) +
@@ -137,7 +133,7 @@ Vcmax25_dry_plot <- ggplot(Vcmax25_dry_plot_df,
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Vcmax25_dry_lims,ylim=Vcmax25_dry_lims)+
+  coord_cartesian(xlim=Vcmax25_lims,ylim=Vcmax25_lims)+
   labs(y = "Measured Vcmax25",
        x = "Predicted Vcmax25")
 
@@ -157,22 +153,6 @@ ETR_fresh_plot_df <- data.frame(
   pred_sd   = apply(ETR_fresh_preds$pred_matrix, 1, sd)
 )
 
-ETR_fresh_lims <- define_lims(ETR_fresh_plot_df)
-
-ETR_fresh_plot <- ggplot(ETR_fresh_plot_df,
-                        aes(y = measured, x = pred_mean)) +
-  theme_bw()+
-  geom_point(size=2)+
-  geom_smooth(method="lm",se=F)+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
-                    xmax = pred_mean + pred_sd), 
-                alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
-  coord_cartesian(xlim=ETR_fresh_lims,ylim=ETR_fresh_lims)+
-  labs(y = "Measured ETR",
-       x = "Predicted ETR")
-
 ## dry
 ETR_dry_preds<-plsr_rnCV(repeats = repeats,
                          outer_folds = outer_folds,
@@ -186,7 +166,22 @@ ETR_dry_plot_df <- data.frame(
   pred_sd   = apply(ETR_dry_preds$pred_matrix, 1, sd)
 )
 
-ETR_dry_lims <- define_lims(ETR_dry_plot_df)
+## plot
+ETR_lims <- define_lims_comparison(ETR_dry_plot_df,ETR_fresh_plot_df)
+
+ETR_fresh_plot <- ggplot(ETR_fresh_plot_df,
+                         aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
+  labs(y = "Measured ETR",
+       x = "Predicted ETR")
 
 ETR_dry_plot <- ggplot(ETR_dry_plot_df,
                        aes(y = measured, x = pred_mean)) +
@@ -198,7 +193,7 @@ ETR_dry_plot <- ggplot(ETR_dry_plot_df,
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=ETR_dry_lims,ylim=ETR_dry_lims)+
+  coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
   labs(y = "Measured ETR",
        x = "Predicted ETR")
 
@@ -218,22 +213,6 @@ Rd_fresh_plot_df <- data.frame(
   pred_sd   = apply(Rd_fresh_preds$pred_matrix, 1, sd)
 )
 
-Rd_fresh_lims <- define_lims(Rd_fresh_plot_df)
-
-Rd_fresh_plot <- ggplot(Rd_fresh_plot_df,
-                        aes(y = measured, x = pred_mean)) +
-  theme_bw()+
-  geom_point(size=2)+
-  geom_smooth(method="lm",se=F)+
-  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
-  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
-                    xmax = pred_mean + pred_sd), 
-                alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_fresh_lims,ylim=Rd_fresh_lims)+
-  labs(y = "Measured Rd",
-       x = "Predicted Rd")
-
 ## dry
 Rd_dry_preds<-plsr_rnCV(repeats = repeats,
                           outer_folds = outer_folds,
@@ -247,7 +226,23 @@ Rd_dry_plot_df <- data.frame(
   pred_sd   = apply(Rd_dry_preds$pred_matrix, 1, sd)
 )
 
-Rd_dry_lims <- define_lims(Rd_dry_plot_df)
+Rd_lims <- define_lims_comparison(Rd_dry_plot_df,Rd_fresh_plot_df)
+
+Rd_fresh_lims <- define_lims(Rd_fresh_plot_df)
+
+Rd_fresh_plot <- ggplot(Rd_fresh_plot_df,
+                        aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
+  labs(y = "Measured Rd",
+       x = "Predicted Rd")
 
 Rd_dry_plot <- ggplot(Rd_dry_plot_df,
                       aes(y = measured, x = pred_mean)) +
@@ -259,7 +254,6 @@ Rd_dry_plot <- ggplot(Rd_dry_plot_df,
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_dry_lims,ylim=Rd_dry_lims)+
+  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
   labs(y = "Measured Rd",
        x = "Predicted Rd")
-
