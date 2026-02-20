@@ -9,11 +9,13 @@ library(pls)
 ## read in data
 ## define parameters for all repeated nested cross-validation
 
+# only broadleaf
+# only 400-900 nm (need to trim dry)
 fresh_spectra<-readRDS("ProcessedData/fresh_spectra_and_traits.rds")
 fresh_spectra_sub<-fresh_spectra[!meta(fresh_spectra)$leaf_type %in% c("needleleaf","scaleleaf"),]
 
 dry_spectra<-readRDS("ProcessedData/dry_spectra_and_traits.rds")
-dry_spectra_sub<-dry_spectra[!meta(dry_spectra)$leaf_type %in% c("needleleaf","scaleleaf"),]
+dry_spectra_sub<-dry_spectra[!meta(dry_spectra)$leaf_type %in% c("needleleaf","scaleleaf"),400:900]
 
 repeats <- 50    # repeats of nested CV
 outer_folds <- 5       # number of outer folds
@@ -227,8 +229,6 @@ Rd_dry_plot_df <- data.frame(
 )
 
 Rd_lims <- define_lims_comparison(Rd_dry_plot_df,Rd_fresh_plot_df)
-
-Rd_fresh_lims <- define_lims(Rd_fresh_plot_df)
 
 Rd_fresh_plot <- ggplot(Rd_fresh_plot_df,
                         aes(y = measured, x = pred_mean)) +
