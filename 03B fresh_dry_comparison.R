@@ -4,6 +4,8 @@ source("Scripts/dry-spectra-photosynthesis/00 useful_functions.R")
 library(spectrolab)
 library(caret)
 library(pls)
+library(ggplot2)
+library(patchwork)
 
 ###############################################
 ## read in data
@@ -64,7 +66,8 @@ Asat_fresh_plot <- ggplot(Asat_fresh_plot_df,
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
   labs(y = "Measured Asat",
-       x = "Predicted Asat")
+       x = "Predicted Asat")+
+  ggtitle("Fresh")
 
 Asat_dry_plot <- ggplot(Asat_dry_plot_df,
                         aes(y = measured, x = pred_mean)) +
@@ -75,20 +78,23 @@ Asat_dry_plot <- ggplot(Asat_dry_plot_df,
   geom_errorbar(aes(xmin = pred_mean - pred_sd, 
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
   coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
   labs(y = "Measured Asat",
-       x = "Predicted Asat")
+       x = "Predicted Asat")+
+  ggtitle("Dried")
 
 #########################################
 ## Vcmax25
 
 ## fresh
 Vcmax25_fresh_preds<-plsr_rnCV(repeats = repeats,
-                            outer_folds = outer_folds,
-                            max_comps = max_comps,
-                            yvar=meta(fresh_spectra_sub)$Vcmax25,
-                            xmat=as.matrix(fresh_spectra_sub))
+                               outer_folds = outer_folds,
+                               max_comps = max_comps,
+                               yvar=meta(fresh_spectra_sub)$Vcmax25,
+                               xmat=as.matrix(fresh_spectra_sub))
 
 Vcmax25_fresh_plot_df <- data.frame(
   measured = meta(fresh_spectra_sub)$Vcmax25,
@@ -134,7 +140,9 @@ Vcmax25_dry_plot <- ggplot(Vcmax25_dry_plot_df,
   geom_errorbar(aes(xmin = pred_mean - pred_sd, 
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
   coord_cartesian(xlim=Vcmax25_lims,ylim=Vcmax25_lims)+
   labs(y = "Measured Vcmax25",
        x = "Predicted Vcmax25")
@@ -194,43 +202,59 @@ ETR_dry_plot <- ggplot(ETR_dry_plot_df,
   geom_errorbar(aes(xmin = pred_mean - pred_sd, 
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
   coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
   labs(y = "Measured ETR",
        x = "Predicted ETR")
 
-##################################
-## Rd
+#########################################
+## Rd25
 
 ## fresh
-Rd_fresh_preds<-plsr_rnCV(repeats = repeats,
-                          outer_folds = outer_folds,
-                          max_comps = max_comps,
-                          yvar=meta(fresh_spectra_sub)$Rd,
-                          xmat=as.matrix(fresh_spectra_sub))
+Rd25_fresh_preds<-plsr_rnCV(repeats = repeats,
+                            outer_folds = outer_folds,
+                            max_comps = max_comps,
+                            yvar=meta(fresh_spectra_sub)$Rd25,
+                            xmat=as.matrix(fresh_spectra_sub))
 
-Rd_fresh_plot_df <- data.frame(
-  measured = meta(fresh_spectra_sub)$Rd,
-  pred_mean = rowMeans(Rd_fresh_preds$pred_matrix),
-  pred_sd   = apply(Rd_fresh_preds$pred_matrix, 1, sd)
+Rd25_fresh_plot_df <- data.frame(
+  measured = meta(fresh_spectra_sub)$Rd25,
+  pred_mean = rowMeans(Rd25_fresh_preds$pred_matrix),
+  pred_sd   = apply(Rd25_fresh_preds$pred_matrix, 1, sd)
 )
 
 ## dry
-Rd_dry_preds<-plsr_rnCV(repeats = repeats,
+Rd25_dry_preds<-plsr_rnCV(repeats = repeats,
                           outer_folds = outer_folds,
                           max_comps = max_comps,
-                          yvar=meta(dry_spectra_sub)$Rd,
+                          yvar=meta(dry_spectra_sub)$Rd25,
                           xmat=as.matrix(dry_spectra_sub))
 
-Rd_dry_plot_df <- data.frame(
-  measured = meta(dry_spectra_sub)$Rd,
-  pred_mean = rowMeans(Rd_dry_preds$pred_matrix),
-  pred_sd   = apply(Rd_dry_preds$pred_matrix, 1, sd)
+Rd25_dry_plot_df <- data.frame(
+  measured = meta(dry_spectra_sub)$Rd25,
+  pred_mean = rowMeans(Rd25_dry_preds$pred_matrix),
+  pred_sd   = apply(Rd25_dry_preds$pred_matrix, 1, sd)
 )
 
-Rd_lims <- define_lims_comparison(Rd_dry_plot_df,Rd_fresh_plot_df)
+Rd25_lims <- define_lims_comparison(Rd25_dry_plot_df,Rd25_fresh_plot_df)
 
-Rd_fresh_plot <- ggplot(Rd_fresh_plot_df,
+Rd25_fresh_plot <- ggplot(Rd25_fresh_plot_df,
+                          aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=Rd25_lims,ylim=Rd25_lims)+
+  labs(y = "Measured Rd25",
+       x = "Predicted Rd25")
+
+Rd25_dry_plot <- ggplot(Rd25_dry_plot_df,
                         aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
@@ -239,13 +263,46 @@ Rd_fresh_plot <- ggplot(Rd_fresh_plot_df,
   geom_errorbar(aes(xmin = pred_mean - pred_sd, 
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
-  theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
-  labs(y = "Measured Rd",
-       x = "Predicted Rd")
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
+  coord_cartesian(xlim=Rd25_lims,ylim=Rd25_lims)+
+  labs(y = "Measured Rd25",
+       x = "Predicted Rd25")
 
-Rd_dry_plot <- ggplot(Rd_dry_plot_df,
-                      aes(y = measured, x = pred_mean)) +
+#########################################
+## LMA
+
+## fresh
+LMA_fresh_preds<-plsr_rnCV(repeats = repeats,
+                           outer_folds = outer_folds,
+                           max_comps = max_comps,
+                           yvar=meta(fresh_spectra_sub)$LMA,
+                           xmat=as.matrix(fresh_spectra_sub))
+
+LMA_fresh_plot_df <- data.frame(
+  measured = meta(fresh_spectra_sub)$LMA,
+  pred_mean = rowMeans(LMA_fresh_preds$pred_matrix),
+  pred_sd   = apply(LMA_fresh_preds$pred_matrix, 1, sd)
+)
+
+## dry
+LMA_dry_preds<-plsr_rnCV(repeats = repeats,
+                         outer_folds = outer_folds,
+                         max_comps = max_comps,
+                         yvar=meta(dry_spectra_sub)$LMA,
+                         xmat=as.matrix(dry_spectra_sub))
+
+LMA_dry_plot_df <- data.frame(
+  measured = meta(dry_spectra_sub)$LMA,
+  pred_mean = rowMeans(LMA_dry_preds$pred_matrix),
+  pred_sd   = apply(LMA_dry_preds$pred_matrix, 1, sd)
+)
+
+LMA_lims <- define_lims_comparison(LMA_dry_plot_df,LMA_fresh_plot_df)
+
+LMA_fresh_plot <- ggplot(LMA_fresh_plot_df,
+                         aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -254,6 +311,106 @@ Rd_dry_plot <- ggplot(Rd_dry_plot_df,
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
-  labs(y = "Measured Rd",
-       x = "Predicted Rd")
+  coord_cartesian(xlim=LMA_lims,ylim=LMA_lims)+
+  labs(y = "Measured LMA",
+       x = "Predicted LMA")+
+  ggtitle("Fresh")
+
+LMA_dry_plot <- ggplot(LMA_dry_plot_df,
+                       aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
+  coord_cartesian(xlim=LMA_lims,ylim=LMA_lims)+
+  labs(y = "Measured LMA",
+       x = "Predicted LMA")+
+  ggtitle("Dried")
+
+
+#########################################
+## EWT
+
+## fresh
+EWT_fresh_preds<-plsr_rnCV(repeats = repeats,
+                           outer_folds = outer_folds,
+                           max_comps = max_comps,
+                           yvar=meta(fresh_spectra_sub)$EWT,
+                           xmat=as.matrix(fresh_spectra_sub))
+
+EWT_fresh_plot_df <- data.frame(
+  measured = meta(fresh_spectra_sub)$EWT,
+  pred_mean = rowMeans(EWT_fresh_preds$pred_matrix),
+  pred_sd   = apply(EWT_fresh_preds$pred_matrix, 1, sd)
+)
+
+## dry
+EWT_dry_preds<-plsr_rnCV(repeats = repeats,
+                         outer_folds = outer_folds,
+                         max_comps = max_comps,
+                         yvar=meta(dry_spectra_sub)$EWT,
+                         xmat=as.matrix(dry_spectra_sub))
+
+EWT_dry_plot_df <- data.frame(
+  measured = meta(dry_spectra_sub)$EWT,
+  pred_mean = rowMeans(EWT_dry_preds$pred_matrix),
+  pred_sd   = apply(EWT_dry_preds$pred_matrix, 1, sd)
+)
+
+EWT_lims <- define_lims_comparison(EWT_dry_plot_df,EWT_fresh_plot_df)
+
+EWT_fresh_plot <- ggplot(EWT_fresh_plot_df,
+                         aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20))+
+  coord_cartesian(xlim=EWT_lims,ylim=EWT_lims)+
+  labs(y = "Measured EWT",
+       x = "Predicted EWT")
+
+EWT_dry_plot <- ggplot(EWT_dry_plot_df,
+                       aes(y = measured, x = pred_mean)) +
+  theme_bw()+
+  geom_point(size=2)+
+  geom_smooth(method="lm",se=F)+
+  geom_abline(slope=1,intercept=0,linetype="dashed",size=2)+
+  geom_errorbar(aes(xmin = pred_mean - pred_sd, 
+                    xmax = pred_mean + pred_sd), 
+                alpha = 0.3, color = "darkslategray") +
+  theme(text = element_text(size=20),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank())+
+  coord_cartesian(xlim=EWT_lims,ylim=EWT_lims)+
+  labs(y = "Measured EWT",
+       x = "Predicted EWT")
+
+##########################################
+## plotting together
+
+pdf("Results/FigXX.pdf",height=18,width=10)
+(Asat_fresh_plot/Vcmax25_fresh_plot/ETR_fresh_plot/Rd_fresh_plot)|
+  (Asat_dry_plot/Vcmax25_dry_plot/ETR_dry_plot/Rd_dry_plot) +
+  plot_layout(guides="collect") & theme(legend.position = "right")
+dev.off()
+
+pdf("Results/FigXX2.pdf",height=10,width=10)
+(LMA_fresh_plot/EWT_fresh_plot)|
+  (LMA_dry_plot/EWT_dry_plot) +
+  plot_layout(guides="collect") & theme(legend.position = "right")
+dev.off()
+
+############################################
+## output tables of results
+
+
