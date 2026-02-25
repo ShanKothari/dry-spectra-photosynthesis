@@ -182,8 +182,8 @@ meta(dry_spectra)$photosynthetic_pathway<-data_summary$pathway[summary_match_dry
 
 spectra_Asat_match_dry<-match(meta(dry_spectra)$SampleID,Asat$SampleID)
 meta(dry_spectra)$Asat<-Asat$A[spectra_Asat_match_dry]
-meta(dry_spectra)$Rd<-Asat$Rdark[spectra_Asat_match_dry]
-meta(dry_spectra)$Rd25<-Asat$Rdark[spectra_Asat_match_dry]
+meta(dry_spectra)$Rd<-Asat$Rd[spectra_Asat_match_dry]
+meta(dry_spectra)$Rd25<-Asat$Rd25[spectra_Asat_match_dry]
 meta(dry_spectra)$ETR<-Asat$ETR[spectra_Asat_match_dry]
 meta(dry_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_dry]
 meta(dry_spectra)$Vcmax25<-Asat$Vcmax25[spectra_Asat_match_dry]
