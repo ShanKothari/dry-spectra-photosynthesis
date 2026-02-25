@@ -93,6 +93,10 @@ Rd$Rd..dark.resp.[which(Rd$Leaf.ID %in% bad_Rd)]<-NA
 ## these are always the second one of their label
 Rd$Rd..dark.resp.[which(duplicated(Rd$Leaf.ID))]<-NA
 
+## temperature normalization of respiration
+## via Heskel et al. 2016 equations
+Rd$Rd25<-Rd$Rd..dark.resp.*exp(0.1012*(25-Rd$Average.of.Tleaf)-0.0005*(25^2-Rd$Average.of.Tleaf^2))
+
 ## replace erroneous value with better one from raw data
 darkFvFm$Fv.Fm[which(darkFvFm$Leaf.ID=="Picea rubens shade 1")]<-0.682972273
 
@@ -109,6 +113,7 @@ Asat$Fv.Fm<-darkFvFm$Fv.Fm[Asat_darkFvFm]
 
 Asat_Rd<-match(Asat$Leaf.ID,Rd$Leaf.ID)
 Asat$Rd..dark.resp.<-Rd$Rd..dark.resp.[Asat_Rd]
+Asat$Rd25<-Rd$Rd25[Asat_Rd]
 Asat$Tleaf_Rdark<-Rd$Average.of.Tleaf[Asat_Rd]
 
 ## attach proper names
@@ -122,7 +127,7 @@ Asat<-rename(Asat,
              RHs=Average.of.RH_S,
              Tleaf=Average.of.Tleaf,
              gsw=Corrected.gs,
-             Rdark=Rd..dark.resp.)
+             Rd=Rd..dark.resp.)
 
 ###############################
 ## read Julien's Farquhar model fits
@@ -131,26 +136,6 @@ load("ProcessedData/LamourAnalyses/2_Fitted_ACi_data.Rdata")
 
 Asat_bilan_fresh<-match(Asat$SampleID,Bilan$SampleID)
 Asat$Vcmax25<-Bilan$Vcmax25[Asat_bilan_fresh]
-
-#################################
-## temperature normalization
-
-## temperature normalization of respiration
-## via Heskel et al. 2016 equations
-
-## get 'a' values based on plant functional type
-Rd_summary_match<-match(Rd$Leaf.ID,data_summary$GEName)
-Rd$leaf_type<-data_summary$leaf_type[Rd_summary_match]
-Rd$leaf_habit<-data_summary$leaf_habit[Rd_summary_match]
-
-a_pft<-rep(NA,length=nrow(Rd))
-a_pft[Rd$leaf_habit=="deciduous"]<- -2.226
-a_pft[Rd$leaf_habit=="evergreen" & Rd$leaf_type=="broadleaf"]<- -1.811
-# lump Larix with evergreen needleleaf
-a_pft[Rd$leaf_type %in% c("needleleaf","scaleleaf")]<- -2.046
-
-## calculate Rd25
-Rd$Rd25<-Rd$Rd..dark.resp.*exp(0.1012*(25-Rd$Average.of.Tleaf)-0.0005*(25^2-Rd$Average.of.Tleaf^2))
 
 #############################################
 ## attach to spectral data
@@ -177,7 +162,8 @@ meta(fresh_spectra)$photosynthetic_pathway<-data_summary$pathway[summary_match_f
 
 spectra_Asat_match_fresh<-match(meta(fresh_spectra)$SampleID,Asat$SampleID)
 meta(fresh_spectra)$Asat<-Asat$A[spectra_Asat_match_fresh]
-meta(fresh_spectra)$Rd<-Asat$Rdark[spectra_Asat_match_fresh]
+meta(fresh_spectra)$Rd<-Asat$Rd[spectra_Asat_match_fresh]
+meta(fresh_spectra)$Rd25<-Asat$Rd25[spectra_Asat_match_fresh]
 meta(fresh_spectra)$ETR<-Asat$ETR[spectra_Asat_match_fresh]
 meta(fresh_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_fresh]
 meta(fresh_spectra)$Vcmax25<-Asat$Vcmax25[spectra_Asat_match_fresh]
@@ -197,6 +183,7 @@ meta(dry_spectra)$photosynthetic_pathway<-data_summary$pathway[summary_match_dry
 spectra_Asat_match_dry<-match(meta(dry_spectra)$SampleID,Asat$SampleID)
 meta(dry_spectra)$Asat<-Asat$A[spectra_Asat_match_dry]
 meta(dry_spectra)$Rd<-Asat$Rdark[spectra_Asat_match_dry]
+meta(dry_spectra)$Rd25<-Asat$Rdark[spectra_Asat_match_dry]
 meta(dry_spectra)$ETR<-Asat$ETR[spectra_Asat_match_dry]
 meta(dry_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_dry]
 meta(dry_spectra)$Vcmax25<-Asat$Vcmax25[spectra_Asat_match_dry]
