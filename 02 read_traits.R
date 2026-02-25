@@ -128,7 +128,29 @@ Asat<-rename(Asat,
 ## read Julien's Farquhar model fits
 
 load("ProcessedData/LamourAnalyses/2_Fitted_ACi_data.Rdata")
-# what about temperature-corrected Rd?
+
+Asat_bilan_fresh<-match(Asat$SampleID,Bilan$SampleID)
+Asat$Vcmax25<-Bilan$Vcmax25[Asat_bilan_fresh]
+
+#################################
+## temperature normalization
+
+## temperature normalization of respiration
+## via Heskel et al. 2016 equations
+
+## get 'a' values based on plant functional type
+Rd_summary_match<-match(Rd$Leaf.ID,data_summary$GEName)
+Rd$leaf_type<-data_summary$leaf_type[Rd_summary_match]
+Rd$leaf_habit<-data_summary$leaf_habit[Rd_summary_match]
+
+a_pft<-rep(NA,length=nrow(Rd))
+a_pft[Rd$leaf_habit=="deciduous"]<- -2.226
+a_pft[Rd$leaf_habit=="evergreen" & Rd$leaf_type=="broadleaf"]<- -1.811
+# lump Larix with evergreen needleleaf
+a_pft[Rd$leaf_type %in% c("needleleaf","scaleleaf")]<- -2.046
+
+## calculate Rd25
+Rd$Rd25<-Rd$Rd..dark.resp.*exp(0.1012*(25-Rd$Average.of.Tleaf)-0.0005*(25^2-Rd$Average.of.Tleaf^2))
 
 #############################################
 ## attach to spectral data
@@ -151,16 +173,14 @@ meta(fresh_spectra)$EWT<-data_summary$EWT[summary_match_fresh]
 meta(fresh_spectra)$leaf_type<-data_summary$leaf_type[summary_match_fresh]
 meta(fresh_spectra)$pubescent<-data_summary$pubescent[summary_match_fresh]
 meta(fresh_spectra)$leaf_habit<-data_summary$leaf_habit[summary_match_fresh]
-meta(fresh_spectra)$Photosynthetic_pathway<-data_summary$pathway[summary_match_fresh]
+meta(fresh_spectra)$photosynthetic_pathway<-data_summary$pathway[summary_match_fresh]
 
 spectra_Asat_match_fresh<-match(meta(fresh_spectra)$SampleID,Asat$SampleID)
 meta(fresh_spectra)$Asat<-Asat$A[spectra_Asat_match_fresh]
 meta(fresh_spectra)$Rd<-Asat$Rdark[spectra_Asat_match_fresh]
 meta(fresh_spectra)$ETR<-Asat$ETR[spectra_Asat_match_fresh]
 meta(fresh_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_fresh]
-
-bilan_match_fresh<-match(meta(fresh_spectra)$SampleID,Bilan$SampleID)
-meta(fresh_spectra)$Vcmax25<-Bilan$Vcmax25[bilan_match_fresh]
+meta(fresh_spectra)$Vcmax25<-Asat$Vcmax25[spectra_Asat_match_fresh]
 
 ## attach to dry spectra...
 summary_match_dry<-match(meta(dry_spectra)$sample_id,data_summary$DrySpectraName)
@@ -172,16 +192,14 @@ meta(dry_spectra)$EWT<-data_summary$EWT[summary_match_dry]
 meta(dry_spectra)$leaf_type<-data_summary$leaf_type[summary_match_dry]
 meta(dry_spectra)$pubescent<-data_summary$pubescent[summary_match_dry]
 meta(dry_spectra)$leaf_habit<-data_summary$leaf_habit[summary_match_dry]
-meta(dry_spectra)$Photosynthetic_pathway<-data_summary$pathway[summary_match_dry]
+meta(dry_spectra)$photosynthetic_pathway<-data_summary$pathway[summary_match_dry]
 
 spectra_Asat_match_dry<-match(meta(dry_spectra)$SampleID,Asat$SampleID)
 meta(dry_spectra)$Asat<-Asat$A[spectra_Asat_match_dry]
 meta(dry_spectra)$Rd<-Asat$Rdark[spectra_Asat_match_dry]
 meta(dry_spectra)$ETR<-Asat$ETR[spectra_Asat_match_dry]
 meta(dry_spectra)$darkFvFm<-Asat$Fv.Fm[spectra_Asat_match_dry]
-
-bilan_match_dry<-match(meta(dry_spectra)$SampleID,Bilan$SampleID)
-meta(dry_spectra)$Vcmax25<-Bilan$Vcmax25[bilan_match_dry]
+meta(dry_spectra)$Vcmax25<-Asat$Vcmax25[spectra_Asat_match_dry]
 
 ## write processed files
 saveRDS(fresh_spectra,"ProcessedData/fresh_spectra_and_traits.rds")
