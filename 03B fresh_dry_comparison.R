@@ -65,8 +65,8 @@ Asat_fresh_plot <- ggplot(Asat_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
-  labs(y = "Measured Asat",
-       x = "Predicted Asat")+
+  labs(y = expression(paste("Measured ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
   ggtitle("Fresh")
 
 Asat_dry_plot <- ggplot(Asat_dry_plot_df,
@@ -82,8 +82,8 @@ Asat_dry_plot <- ggplot(Asat_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
-  labs(y = "Measured Asat",
-       x = "Predicted Asat")+
+  labs(y = expression(paste("Measured ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
   ggtitle("Dried")
 
 #########################################
@@ -128,8 +128,8 @@ Vcmax25_fresh_plot <- ggplot(Vcmax25_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=Vcmax25_lims,ylim=Vcmax25_lims)+
-  labs(y = "Measured Vcmax25",
-       x = "Predicted Vcmax25")
+  labs(y = expression(paste("Measured ",italic(V[cmax25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(V[cmax25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
 
 Vcmax25_dry_plot <- ggplot(Vcmax25_dry_plot_df,
                            aes(y = measured, x = pred_mean)) +
@@ -144,8 +144,8 @@ Vcmax25_dry_plot <- ggplot(Vcmax25_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=Vcmax25_lims,ylim=Vcmax25_lims)+
-  labs(y = "Measured Vcmax25",
-       x = "Predicted Vcmax25")
+  labs(y = expression(paste("Measured ",italic(V[cmax25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(V[cmax25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
 
 #######################################
 ## ETR
@@ -190,8 +190,8 @@ ETR_fresh_plot <- ggplot(ETR_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
-  labs(y = "Measured ETR",
-       x = "Predicted ETR")
+  labs(y = expression(paste("Measured ETR (",mu,"mol ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ETR (",mu,"mol ",m^-2," ",s^-1,")")))
 
 ETR_dry_plot <- ggplot(ETR_dry_plot_df,
                        aes(y = measured, x = pred_mean)) +
@@ -206,8 +206,8 @@ ETR_dry_plot <- ggplot(ETR_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
-  labs(y = "Measured ETR",
-       x = "Predicted ETR")
+  labs(y = expression(paste("Measured ETR (",mu,"mol ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ETR (",mu,"mol ",m^-2," ",s^-1,")")))
 
 #########################################
 ## Rd25
@@ -251,8 +251,8 @@ Rd25_fresh_plot <- ggplot(Rd25_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=Rd25_lims,ylim=Rd25_lims)+
-  labs(y = "Measured Rd25",
-       x = "Predicted Rd25")
+  labs(y = expression(paste("Measured ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
 
 Rd25_dry_plot <- ggplot(Rd25_dry_plot_df,
                         aes(y = measured, x = pred_mean)) +
@@ -267,8 +267,8 @@ Rd25_dry_plot <- ggplot(Rd25_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=Rd25_lims,ylim=Rd25_lims)+
-  labs(y = "Measured Rd25",
-       x = "Predicted Rd25")
+  labs(y = expression(paste("Measured ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
 
 #########################################
 ## LMA
@@ -312,8 +312,8 @@ LMA_fresh_plot <- ggplot(LMA_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=LMA_lims,ylim=LMA_lims)+
-  labs(y = "Measured LMA",
-       x = "Predicted LMA")+
+  labs(y=expression("Measured LMA (kg m"^-2*")"),
+       x=expression("Predicted LMA (kg m"^-2*")"))+
   ggtitle("Fresh")
 
 LMA_dry_plot <- ggplot(LMA_dry_plot_df,
@@ -329,8 +329,8 @@ LMA_dry_plot <- ggplot(LMA_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=LMA_lims,ylim=LMA_lims)+
-  labs(y = "Measured LMA",
-       x = "Predicted LMA")+
+  labs(y=expression("Measured LMA (kg m"^-2*")"),
+       x=expression("Predicted LMA (kg m"^-2*")"))+
   ggtitle("Dried")
 
 
@@ -376,8 +376,8 @@ EWT_fresh_plot <- ggplot(EWT_fresh_plot_df,
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=EWT_lims,ylim=EWT_lims)+
-  labs(y = "Measured EWT",
-       x = "Predicted EWT")
+  labs(y = "Measured EWT (mm)",
+       x = "Predicted EWT (mm)")
 
 EWT_dry_plot <- ggplot(EWT_dry_plot_df,
                        aes(y = measured, x = pred_mean)) +
@@ -392,19 +392,19 @@ EWT_dry_plot <- ggplot(EWT_dry_plot_df,
         axis.text.y = element_blank(),
         axis.title.y = element_blank())+
   coord_cartesian(xlim=EWT_lims,ylim=EWT_lims)+
-  labs(y = "Measured EWT",
-       x = "Predicted EWT")
+  labs(y = "Measured EWT (mm)",
+       x = "Predicted EWT (mm)")
 
 ##########################################
 ## plotting together
 
-pdf("Results/FigXX.pdf",height=18,width=10)
-(Asat_fresh_plot/Vcmax25_fresh_plot/ETR_fresh_plot/Rd_fresh_plot)|
-  (Asat_dry_plot/Vcmax25_dry_plot/ETR_dry_plot/Rd_dry_plot) +
+pdf("Results/FigXX.pdf",height=20,width=11)
+(Asat_fresh_plot/Vcmax25_fresh_plot/ETR_fresh_plot/Rd25_fresh_plot)|
+  (Asat_dry_plot/Vcmax25_dry_plot/ETR_dry_plot/Rd25_dry_plot) +
   plot_layout(guides="collect") & theme(legend.position = "right")
 dev.off()
 
-pdf("Results/FigXX2.pdf",height=10,width=10)
+pdf("Results/FigXX2.pdf",height=10,width=11)
 (LMA_fresh_plot/EWT_fresh_plot)|
   (LMA_dry_plot/EWT_dry_plot) +
   plot_layout(guides="collect") & theme(legend.position = "right")

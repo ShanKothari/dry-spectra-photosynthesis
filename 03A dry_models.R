@@ -5,6 +5,13 @@ library(spectrolab)
 library(caret)
 library(pls)
 
+######
+## project to dos
+
+# check with Juan that I'm pulling from the right place
+# write code to put model outputs in tables
+# two 'Alnus 3's in Rd
+
 ##################################################################
 ## read data and set parameters
 
@@ -32,7 +39,7 @@ Asat_plot_df <- data.frame(
 
 Asat_lims <- define_lims(Asat_plot_df)
 
-ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
+Asat_plot<-ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -42,15 +49,15 @@ ggplot(Asat_plot_df, aes(y = measured, x = pred_mean)) +
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=Asat_lims,ylim=Asat_lims)+
-  labs(y = "Measured Asat",
-       x = "Predicted Asat")
+  labs(y = expression(paste("Measured ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(A[sat])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))
 
 ## ETR
 ETR_preds<-plsr_rnCV(repeats = repeats,
-                      outer_folds = outer_folds,
-                      max_comps = max_comps,
-                      yvar=meta(dry_spectra)$ETR,
-                      xmat=as.matrix(dry_spectra))
+                     outer_folds = outer_folds,
+                     max_comps = max_comps,
+                     yvar=meta(dry_spectra)$ETR,
+                     xmat=as.matrix(dry_spectra))
 
 ETR_plot_df <- data.frame(
   measured = meta(dry_spectra)$ETR,
@@ -60,7 +67,7 @@ ETR_plot_df <- data.frame(
 
 ETR_lims <- define_lims(ETR_plot_df)
 
-ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
+ETR_plot<-ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -70,25 +77,25 @@ ggplot(ETR_plot_df, aes(y = measured, x = pred_mean)) +
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
   coord_cartesian(xlim=ETR_lims,ylim=ETR_lims)+
-  labs(y = "Measured ETR",
-       x = "Predicted ETR")
+  labs(y = expression(paste("Measured ETR (",mu,"mol ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ETR (",mu,"mol ",m^-2," ",s^-1,")")))
 
-## Rd
-Rd_preds<-plsr_rnCV(repeats = repeats,
-                     outer_folds = outer_folds,
-                     max_comps = max_comps,
-                     yvar=meta(dry_spectra)$Rd,
-                     xmat=as.matrix(dry_spectra))
+## Rd25
+Rd25_preds<-plsr_rnCV(repeats = repeats,
+                      outer_folds = outer_folds,
+                      max_comps = max_comps,
+                      yvar=meta(dry_spectra)$Rd25,
+                      xmat=as.matrix(dry_spectra))
 
-Rd_plot_df <- data.frame(
-  measured = meta(dry_spectra)$Rd,
-  pred_mean = rowMeans(Rd_preds$pred_matrix),
-  pred_sd   = apply(Rd_preds$pred_matrix, 1, sd)
+Rd25_plot_df <- data.frame(
+  measured = meta(dry_spectra)$Rd25,
+  pred_mean = rowMeans(Rd25_preds$pred_matrix),
+  pred_sd   = apply(Rd25_preds$pred_matrix, 1, sd)
 )
 
-Rd_lims <- define_lims(Rd_plot_df)
+Rd25_lims <- define_lims(Rd25_plot_df)
 
-ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
+Rd25_plot<-ggplot(Rd25_plot_df, aes(y = measured, x = pred_mean)) +
   theme_bw()+
   geom_point(size=2)+
   geom_smooth(method="lm",se=F)+
@@ -97,6 +104,6 @@ ggplot(Rd_plot_df, aes(y = measured, x = pred_mean)) +
                     xmax = pred_mean + pred_sd), 
                 alpha = 0.3, color = "darkslategray") +
   theme(text = element_text(size=20))+
-  coord_cartesian(xlim=Rd_lims,ylim=Rd_lims)+
-  labs(y = "Measured Rd",
-       x = "Predicted Rd")
+  coord_cartesian(xlim=Rd25_lims,ylim=Rd25_lims)+
+  labs(y = expression(paste("Measured ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")),
+       x = expression(paste("Predicted ",italic(R[d25])," (",mu,"mol ",CO[2]," ",m^-2," ",s^-1,")")))

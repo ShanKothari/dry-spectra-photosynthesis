@@ -24,8 +24,8 @@ area_data<-area_data[!duplicated(area_data$SpectraName),]
 area_match_fresh<-match(data_summary$SpectraName,area_data$SpectraName)
 ## sq in to sq cm
 data_summary$area<-area_data$Area..in2.[area_match_fresh]*2.54^2
-## g per sq cm to g per sq m
-data_summary$LMA<-data_summary$Dry.weight..g./data_summary$area*10000
+## g per sq cm to kg per sq m
+data_summary$LMA<-data_summary$Dry.weight..g./data_summary$area*10
 ## calculate EWT in mm
 data_summary$EWT<-(data_summary$Fresh.weight..g.-data_summary$Dry.weight..g.)/data_summary$area*10
 
